@@ -1,0 +1,19 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+*.lock
+.DS_Store
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
