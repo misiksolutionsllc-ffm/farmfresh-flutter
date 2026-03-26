@@ -172,8 +172,6 @@ class _MerchantAppScreenState extends State<MerchantAppScreen> {
       const SizedBox(height: 24),
       Text('Top Products', style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 12),
-      ...products.toList()
-        ..sort((a, b) => b.sales.compareTo(a.sales)),
       ...(products.toList()..sort((a, b) => b.sales.compareTo(a.sales))).take(5).map((p) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Row(children: [
