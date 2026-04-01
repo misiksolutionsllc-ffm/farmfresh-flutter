@@ -88,7 +88,7 @@ class _AdminAppScreenState extends State<AdminAppScreen> {
         const SizedBox(height: 12),
         _RoleRow('Customers', app.users.where((u) => u.role == UserRole.customer).length, AppColors.emerald, Icons.shopping_cart),
         _RoleRow('Drivers', app.users.where((u) => u.role == UserRole.driver).length, AppColors.blue, Icons.local_shipping),
-        _RoleRow('Merchants', app.users.where((u) => u.role == UserRole.farmer).length, AppColors.orange, Icons.store),
+        _RoleRow('Farmers', app.users.where((u) => u.role == UserRole.farmer).length, AppColors.orange, Icons.store),
       ])),
       const SizedBox(height: 16),
 
@@ -174,7 +174,7 @@ class _AdminAppScreenState extends State<AdminAppScreen> {
                 Text(app.users.cast<User?>().firstWhere((u) => u?.id == order.customerId, orElse: () => null)?.name ?? '–', style: const TextStyle(color: Colors.white, fontSize: 13)),
               ])),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Merchant', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                Text('Farmer', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
                 Text(app.users.cast<User?>().firstWhere((u) => u?.id == order.merchantId, orElse: () => null)?.name ?? '–', style: const TextStyle(color: Colors.white, fontSize: 13)),
               ])),
               Text(formatCurrency(order.total), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),

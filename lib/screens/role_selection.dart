@@ -10,7 +10,7 @@ class RoleSelectionScreen extends StatelessWidget {
   static final _roles = [
     _RoleData(UserRole.customer, 'Consumer', '🛒', 'Shop fresh local produce', AppColors.emerald),
     _RoleData(UserRole.driver, 'Driver', '🚗', 'Deliver orders and earn', AppColors.blue),
-    _RoleData(UserRole.farmer, 'Merchant', '🏪', 'Sell your farm products', AppColors.orange),
+    _RoleData(UserRole.farmer, 'Farmer American Hero', '🏪', 'Sell your farm products', AppColors.orange),
   ];
 
   @override

@@ -17,7 +17,7 @@ extension UserRoleExt on UserRole {
     switch (this) {
       case UserRole.customer: return 'Consumer';
       case UserRole.driver: return 'Driver';
-      case UserRole.farmer: return 'Merchant';
+      case UserRole.farmer: return 'Farmer American Hero';
       case UserRole.owner: return 'Admin';
     }
   }

@@ -408,43 +408,26 @@ class AppProvider extends ChangeNotifier {
   }
 
   // ============================================
-  // Seed Data
+  // Clean Launch Data
   // ============================================
   void _initSeedData() {
     users = [
-      User(id: 'u1', name: 'Alice Consumer', role: UserRole.customer, email: 'alice@test.com', phone: '555-0101', verified: true, favorites: ['p1'], points: 150, credits: 10.0, referralCode: 'ALICE10', referralCount: 2, address: UserAddress(street: '10300 Forest Hill Blvd', city: 'Wellington', state: 'FL', zip: '33414'), totalSpent: 450.0, loyaltyTier: 'Silver', documents: [Document(type: 'ID Card', status: 'approved', date: '2023-01-15')]),
-      User(id: 'u2', name: 'Mike Racer', role: UserRole.driver, email: 'mike@drive.com', phone: '555-0202', verified: true, rating: 4.9, trips: 145, earnings: 1240.50, online: true, acceptanceRate: 94, bankLast4: '8821', cardLast4: '4242', documents: [Document(type: 'Driver License', status: 'approved', date: '2023-02-20'), Document(type: 'Vehicle Insurance', status: 'approved', date: '2023-02-20')]),
-      User(id: 'u3', name: 'Green Acres', role: UserRole.farmer, email: 'farm@fresh.com', phone: '555-0303', rating: 4.8, revenue: 15400, description: 'Family owned since 1985.', address: UserAddress(street: '12794 W Forest Hill Blvd', city: 'Wellington', state: 'FL', zip: '33414'), documents: [Document(type: 'Business License', status: 'pending', date: '2023-10-01'), Document(type: 'Food Safety Cert', status: 'approved', date: '2023-01-10')]),
-      User(id: 'u4', name: 'Admin User', role: UserRole.owner, email: 'admin@platform.com', verified: true),
+      User(id: 'u1', name: 'New Customer', role: UserRole.customer, email: 'customer@farmfresh.app', points: 0, credits: 0, referralCode: 'FRESH10', referralCount: 0, totalSpent: 0, loyaltyTier: 'Bronze'),
+      User(id: 'u2', name: 'New Driver', role: UserRole.driver, email: 'driver@farmfresh.app', rating: 0, trips: 0, earnings: 0, online: false, acceptanceRate: 0),
+      User(id: 'u3', name: 'New Farmer', role: UserRole.farmer, email: 'farmer@farmfresh.app', rating: 0, revenue: 0),
+      User(id: 'u4', name: 'Platform Admin', role: UserRole.owner, email: 'misiksolutionsllc@gmail.com', verified: true),
     ];
 
-    products = [
-      Product(id: 'p1', farmerId: 'u3', name: 'Organic Honeycrisp Apples', price: 2.99, unit: 'lb', image: '🍎', category: 'Fruits', stock: 50, sales: 120, rating: 4.8, reviews: 12, description: 'Crisp, sweet, and locally grown.', organic: true, vegan: true, glutenFree: true),
-      Product(id: 'p2', farmerId: 'u3', name: 'Free-Range Brown Eggs', price: 5.50, unit: 'doz', image: '🥚', category: 'Dairy', stock: 4, sales: 85, rating: 4.9, reviews: 20, description: 'Gathered daily from happy hens.', organic: true, glutenFree: true),
-      Product(id: 'p3', farmerId: 'u3', name: 'Heirloom Tomatoes', price: 4.25, unit: 'lb', image: '🍅', category: 'Vegetables', stock: 30, sales: 45, rating: 4.5, reviews: 8, description: 'Juicy heritage tomato varieties.', organic: true, vegan: true, glutenFree: true),
-      Product(id: 'p4', farmerId: 'u3', name: 'Fresh Sourdough', price: 6.00, unit: 'loaf', image: '🍞', category: 'Bakery', stock: 0, sales: 200, rating: 5.0, reviews: 30, description: 'Artisan baked with 100-year-old starter.', vegan: true),
-      Product(id: 'p5', farmerId: 'u3', name: 'Organic Carrots', price: 3.49, unit: 'bunch', image: '🥕', category: 'Vegetables', stock: 25, sales: 67, rating: 4.7, reviews: 15, description: 'Sweet and crunchy.', organic: true, vegan: true, glutenFree: true),
-      Product(id: 'p6', farmerId: 'u3', name: 'Fresh Strawberries', price: 4.99, unit: 'pint', image: '🍓', category: 'Fruits', stock: 18, sales: 92, rating: 4.9, reviews: 25, description: 'Picked at peak ripeness.', organic: true, vegan: true, glutenFree: true),
-    ];
-
-    orders = [
-      Order(id: 'ord-1', customerId: 'u1', merchantId: 'u3', items: [OrderItem(id: 'p1', name: 'Organic Honeycrisp Apples', price: 2.99, qty: 2, image: '🍎')], total: 13.99, status: 'Delivered', date: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(), driverId: 'u2', fees: const OrderFees(subtotal: 5.98, delivery: 4.99, platform: 0.60, tax: 0.42, tip: 2.00)),
-      Order(id: 'ord-2', customerId: 'u1', merchantId: 'u3', items: [OrderItem(id: 'p3', name: 'Heirloom Tomatoes', price: 4.25, qty: 3, image: '🍅'), OrderItem(id: 'p6', name: 'Fresh Strawberries', price: 4.99, qty: 1, image: '🍓')], total: 22.74, status: 'Pending', date: DateTime.now().toIso8601String(), fees: const OrderFees(subtotal: 17.74, delivery: 4.99)),
-      Order(id: 'ord-3', customerId: 'u1', merchantId: 'u3', items: [OrderItem(id: 'p2', name: 'Free-Range Brown Eggs', price: 5.50, qty: 2, image: '🥚'), OrderItem(id: 'p5', name: 'Organic Carrots', price: 3.49, qty: 2, image: '🥕')], total: 23.97, status: 'Processing', date: DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(), fees: const OrderFees(subtotal: 17.98, delivery: 4.99, platform: 0.60, tax: 0.40)),
-    ];
-
-    transactions = [
-      Transaction(id: 'tx-1', type: 'Payout', amount: -250.00, date: DateTime.now().subtract(const Duration(days: 7)).toIso8601String(), status: 'Completed', method: 'Bank Transfer'),
-    ];
+    products = [];
+    orders = [];
+    transactions = [];
 
     promos = [
-      PromoCode(code: 'FRESH20', discount: 0.20, type: 'percent', label: '20% Off', usedCount: 45, minOrder: 20),
-      PromoCode(code: 'WELCOME5', discount: 5.00, type: 'flat', label: '\$5 Off', usedCount: 120),
+      PromoCode(code: 'FRESH20', discount: 0.20, type: 'percent', label: '20% Off', usedCount: 0, minOrder: 20),
+      PromoCode(code: 'WELCOME5', discount: 5.00, type: 'flat', label: '\$5 Off First Order', usedCount: 0),
+      PromoCode(code: 'FREEDELIVERY', discount: 0, type: 'free_delivery', label: 'Free Delivery', usedCount: 0, minOrder: 25),
     ];
 
-    reviews = [
-      Review(id: 'rev-1', productId: 'p1', customerId: 'u1', customerName: 'Alice C.', rating: 5, comment: 'Best apples ever!', date: DateTime.now().subtract(const Duration(days: 2)).toIso8601String(), status: 'approved'),
-      Review(id: 'rev-2', productId: 'p2', customerId: 'u1', customerName: 'Alice C.', rating: 5, comment: 'Amazing eggs.', date: DateTime.now().subtract(const Duration(days: 1)).toIso8601String(), status: 'approved'),
-    ];
+    reviews = [];
   }
 }
