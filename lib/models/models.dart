@@ -116,6 +116,10 @@ class User {
   int? acceptanceRate;
   String? bankLast4;
   String? cardLast4;
+  String? vehicleMake;
+  String? vehicleModel;
+  String? vehicleYear;
+  String? vehiclePlate;
   // Merchant fields
   double? revenue;
   String? description;
@@ -131,6 +135,7 @@ class User {
     this.referralCode, this.referralCount = 0,
     this.rating, this.trips, this.earnings, this.online,
     this.acceptanceRate, this.bankLast4, this.cardLast4,
+    this.vehicleMake, this.vehicleModel, this.vehicleYear, this.vehiclePlate,
     this.revenue, this.description, this.totalSpent,
     this.loyaltyTier, this.documents = const [],
   });
@@ -144,6 +149,8 @@ class User {
     'rating': rating, 'trips': trips, 'earnings': earnings,
     'online': online, 'acceptanceRate': acceptanceRate,
     'bankLast4': bankLast4, 'cardLast4': cardLast4,
+    'vehicleMake': vehicleMake, 'vehicleModel': vehicleModel,
+    'vehicleYear': vehicleYear, 'vehiclePlate': vehiclePlate,
     'revenue': revenue, 'description': description,
     'totalSpent': totalSpent, 'loyaltyTier': loyaltyTier,
     'documents': documents.map((d) => d.toJson()).toList(),
@@ -163,6 +170,8 @@ class User {
     earnings: j['earnings']?.toDouble(), online: j['online'],
     acceptanceRate: j['acceptanceRate'],
     bankLast4: j['bankLast4'], cardLast4: j['cardLast4'],
+    vehicleMake: j['vehicleMake'], vehicleModel: j['vehicleModel'],
+    vehicleYear: j['vehicleYear'], vehiclePlate: j['vehiclePlate'],
     revenue: j['revenue']?.toDouble(), description: j['description'],
     totalSpent: j['totalSpent']?.toDouble(), loyaltyTier: j['loyaltyTier'],
     documents: (j['documents'] as List?)?.map((d) => Document.fromJson(d)).toList() ?? [],

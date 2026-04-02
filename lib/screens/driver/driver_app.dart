@@ -22,7 +22,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
 
     final available = app.deliveries.where((d) => d.driverId == null && d.status == 'Pending').toList();
     final myDeliveries = app.deliveries.where((d) => d.driverId == app.currentUserId).toList();
-    final active = myDeliveries.cast().firstWhere((d) => d != null && d.status != 'Delivered', orElse: () => null);
+    final active = myDeliveries.isNotEmpty ? myDeliveries.cast<Delivery?>().firstWhere((d) => d != null && d!.status != 'Delivered', orElse: () => null) : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -33,7 +33,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
         _buildDashboard(app, driver, available, active),
         _buildDeliveries(app, available),
         _buildEarnings(app, driver),
-        _buildProfile(driver),
+        _buildProfile(app, driver),
       ]),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
@@ -50,7 +50,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
     );
   }
 
-  Widget _buildDashboard(AppProvider app, driver, List available, active) {
+  Widget _buildDashboard(AppProvider app, User driver, List<Delivery> available, Delivery? active) {
     return ListView(padding: const EdgeInsets.all(16), children: [
       // Online toggle
       Container(
@@ -136,7 +136,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
     ]);
   }
 
-  Widget _buildDeliveries(AppProvider app, List available) {
+  Widget _buildDeliveries(AppProvider app, List<Delivery> available) {
     if (available.isEmpty) return const EmptyState(emoji: '📦', message: 'No deliveries available');
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -175,7 +175,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
     );
   }
 
-  Widget _buildEarnings(AppProvider app, driver) {
+  Widget _buildEarnings(AppProvider app, User driver) {
     return ListView(padding: const EdgeInsets.all(16), children: [
       Container(
         padding: const EdgeInsets.all(28),
@@ -219,20 +219,234 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
     ]);
   }
 
-  Widget _buildProfile(driver) {
-    return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      CircleAvatar(radius: 40, backgroundColor: AppColors.blue.withOpacity(0.2), child: Text(driver.name[0], style: TextStyle(color: AppColors.blue, fontSize: 28, fontWeight: FontWeight.w700))),
-      const SizedBox(height: 12),
-      Text(driver.name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-      Text(driver.email, style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-      const SizedBox(height: 8),
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Icon(Icons.star, color: AppColors.warning, size: 16),
-        const SizedBox(width: 4),
-        Text('${driver.rating ?? '–'}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        Text(' • ${driver.trips ?? 0} trips', style: TextStyle(color: AppColors.textMuted)),
+  Widget _buildProfile(AppProvider app, User driver) {
+    return ListView(padding: const EdgeInsets.all(16), children: [
+      // Hero card
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [AppColors.blue.withOpacity(0.08), AppColors.surface800.withOpacity(0.3)]),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Column(children: [
+          Row(children: [
+            CircleAvatar(radius: 30, backgroundColor: AppColors.blue.withOpacity(0.2), child: Text(driver.name.isNotEmpty ? driver.name[0] : '?', style: TextStyle(color: AppColors.blue, fontSize: 24, fontWeight: FontWeight.w700))),
+            const SizedBox(width: 14),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(driver.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(driver.email, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+              if (driver.phone?.isNotEmpty ?? false)
+                Text(driver.phone!, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+            ])),
+            IconButton(
+              icon: const Icon(Icons.edit, color: AppColors.blue, size: 20),
+              onPressed: () => _showEditProfile(app, driver),
+            ),
+          ]),
+          const SizedBox(height: 16),
+          // Stats row
+          Row(children: [
+            _ProfileStat(formatCurrency(driver.earnings), 'Earnings', AppColors.emerald),
+            _ProfileStat('${driver.trips ?? 0}', 'Trips', AppColors.blue),
+            _ProfileStat('${driver.acceptanceRate ?? 0}%', 'Accept', AppColors.warning),
+            _ProfileStat('${driver.rating?.toStringAsFixed(1) ?? '–'}', 'Rating', const Color(0xFF8B5CF6)),
+          ]),
+        ]),
+      ),
+      const SizedBox(height: 16),
+
+      // Earnings & Payout
+      _SectionCard(title: '💰 Earnings & Payouts', children: [
+        Row(children: [
+          _EarningBox('Available', formatCurrency(driver.earnings), AppColors.emerald),
+          const SizedBox(width: 8),
+          _EarningBox('Lifetime', formatCurrency((driver.trips ?? 0) * 8.5), Colors.white),
+        ]),
+        const SizedBox(height: 12),
+        SizedBox(width: double.infinity, child: ElevatedButton.icon(
+          onPressed: (driver.earnings ?? 0) > 0 ? () => app.driverPayout(driver.earnings ?? 0, 'bank') : null,
+          icon: const Icon(Icons.account_balance, size: 18),
+          label: const Text('Withdraw to Bank'),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.blue, disabledBackgroundColor: AppColors.surface800),
+        )),
       ]),
-    ]));
+      const SizedBox(height: 12),
+
+      // Bank Account
+      _SectionCard(
+        title: '🏦 Bank Account',
+        trailing: TextButton(child: Text(driver.bankLast4 != null ? 'Edit' : 'Add', style: const TextStyle(color: AppColors.blue, fontSize: 12)), onPressed: () => _showBankModal(app, driver)),
+        children: [
+          if (driver.bankLast4 != null)
+            _InfoTile(Icons.account_balance, 'Bank Account •••• ${driver.bankLast4}', 'Checking • Direct Deposit', trailing: _VerifiedBadge())
+          else
+            _AddButton('Add bank account for payouts', () => _showBankModal(app, driver)),
+          if (driver.cardLast4 != null) ...[
+            const SizedBox(height: 8),
+            _InfoTile(Icons.credit_card, 'Visa •••• ${driver.cardLast4}', 'For instant payouts'),
+          ],
+        ],
+      ),
+      const SizedBox(height: 12),
+
+      // Vehicle
+      _SectionCard(
+        title: '🚗 Vehicle',
+        trailing: TextButton(child: Text(driver.vehicleMake != null ? 'Edit' : 'Add', style: const TextStyle(color: AppColors.blue, fontSize: 12)), onPressed: () => _showVehicleModal(app, driver)),
+        children: [
+          if (driver.vehicleMake != null)
+            _InfoTile(Icons.directions_car, '${driver.vehicleYear ?? ''} ${driver.vehicleMake} ${driver.vehicleModel ?? ''}', 'Plate: ${driver.vehiclePlate ?? '—'}')
+          else
+            _AddButton('Add vehicle information', () => _showVehicleModal(app, driver)),
+        ],
+      ),
+      const SizedBox(height: 12),
+
+      // Performance
+      _SectionCard(title: '📊 Performance', children: [
+        _ProgressRow('Acceptance Rate', (driver.acceptanceRate ?? 0) / 100, AppColors.blue),
+        const SizedBox(height: 10),
+        _ProgressRow('Rating Score', (driver.rating ?? 0) / 5, AppColors.warning),
+        const SizedBox(height: 10),
+        _ProgressRow('Trip Goal (200)', ((driver.trips ?? 0) / 200).clamp(0.0, 1.0), AppColors.emerald),
+      ]),
+      const SizedBox(height: 12),
+
+      // Documents
+      _SectionCard(title: '📋 Documents', children: [
+        if (driver.documents.isEmpty)
+          Center(child: Padding(padding: const EdgeInsets.all(16), child: Text('No documents uploaded yet', style: TextStyle(color: AppColors.textMuted, fontSize: 12))))
+        else
+          ...driver.documents.map((doc) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Row(children: [
+                Icon(Icons.description, color: AppColors.textMuted, size: 16),
+                const SizedBox(width: 8),
+                Text(doc.type, style: const TextStyle(color: Colors.white, fontSize: 13)),
+              ]),
+              StatusBadge(doc.status),
+            ]),
+          )),
+      ]),
+      const SizedBox(height: 80),
+    ]);
+  }
+
+  void _showEditProfile(AppProvider app, User driver) {
+    final nameCtl = TextEditingController(text: driver.name);
+    final phoneCtl = TextEditingController(text: driver.phone ?? '');
+    final emailCtl = TextEditingController(text: driver.email);
+    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: AppColors.surface900,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Edit Profile', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 20),
+          _Input(nameCtl, 'Full Name', Icons.person),
+          const SizedBox(height: 12),
+          _Input(phoneCtl, 'Phone Number', Icons.phone),
+          const SizedBox(height: 12),
+          _Input(emailCtl, 'Email', Icons.email),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, child: ElevatedButton(
+            onPressed: () {
+              app.updateUserProfile(app.currentUserId!, name: nameCtl.text, phone: phoneCtl.text, email: emailCtl.text);
+              Navigator.pop(context);
+              app.showToast('Profile updated!');
+            },
+            child: const Text('Save Changes'),
+          )),
+        ]),
+      ),
+    );
+  }
+
+  void _showBankModal(AppProvider app, User driver) {
+    final bankNameCtl = TextEditingController();
+    final routingCtl = TextEditingController();
+    final accountCtl = TextEditingController();
+    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: AppColors.surface900,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(driver.bankLast4 != null ? 'Edit Bank Account' : 'Add Bank Account', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Row(children: [
+            Icon(Icons.shield, color: AppColors.blue, size: 14),
+            const SizedBox(width: 6),
+            Text('AES-256 encrypted • Never shared', style: TextStyle(color: AppColors.blue, fontSize: 11)),
+          ]),
+          const SizedBox(height: 16),
+          _Input(bankNameCtl, 'Bank Name', Icons.account_balance),
+          const SizedBox(height: 12),
+          _Input(routingCtl, 'Routing Number (9 digits)', Icons.numbers, mono: true),
+          const SizedBox(height: 12),
+          _Input(accountCtl, 'Account Number', Icons.lock, mono: true, obscure: true),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, child: ElevatedButton(
+            onPressed: () {
+              if (bankNameCtl.text.isNotEmpty && routingCtl.text.length == 9 && accountCtl.text.isNotEmpty) {
+                app.updateUserProfile(app.currentUserId!, bankLast4: accountCtl.text.substring(accountCtl.text.length - 4));
+                Navigator.pop(context);
+                app.showToast('Bank account saved!');
+              }
+            },
+            child: const Text('Save Bank Account'),
+          )),
+          if (driver.bankLast4 != null) ...[
+            const SizedBox(height: 8),
+            TextButton(onPressed: () {
+              app.updateUserProfile(app.currentUserId!, bankLast4: '');
+              Navigator.pop(context);
+              app.showToast('Bank account removed');
+            }, child: const Text('Remove bank account', style: TextStyle(color: AppColors.error, fontSize: 13))),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  void _showVehicleModal(AppProvider app, User driver) {
+    final yearCtl = TextEditingController(text: driver.vehicleYear ?? '');
+    final makeCtl = TextEditingController(text: driver.vehicleMake ?? '');
+    final modelCtl = TextEditingController(text: driver.vehicleModel ?? '');
+    final plateCtl = TextEditingController(text: driver.vehiclePlate ?? '');
+    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: AppColors.surface900,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Vehicle Information', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: _Input(yearCtl, 'Year', Icons.calendar_today)),
+            const SizedBox(width: 12),
+            Expanded(child: _Input(makeCtl, 'Make', Icons.directions_car)),
+          ]),
+          const SizedBox(height: 12),
+          _Input(modelCtl, 'Model', Icons.car_repair),
+          const SizedBox(height: 12),
+          _Input(plateCtl, 'License Plate', Icons.badge, mono: true),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, child: ElevatedButton(
+            onPressed: () {
+              if (makeCtl.text.isNotEmpty && modelCtl.text.isNotEmpty) {
+                app.updateUserProfile(app.currentUserId!,
+                  vehicleMake: makeCtl.text, vehicleModel: modelCtl.text,
+                  vehicleYear: yearCtl.text, vehiclePlate: plateCtl.text.toUpperCase());
+                Navigator.pop(context);
+                app.showToast('Vehicle info saved!');
+              }
+            },
+            child: const Text('Save Vehicle'),
+          )),
+        ]),
+      ),
+    );
   }
 }
 
@@ -252,4 +466,157 @@ class _AddressRow extends StatelessWidget {
       ])),
     ]);
   }
+}
+
+class _ProfileStat extends StatelessWidget {
+  final String value, label;
+  final Color color;
+  const _ProfileStat(this.value, this.label, this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(color: AppColors.surface900.withOpacity(0.5), borderRadius: BorderRadius.circular(12)),
+      child: Column(children: [
+        Text(value, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+      ]),
+    ));
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget? trailing;
+  final List<Widget> children;
+  const _SectionCard({required this.title, this.trailing, required this.children});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface800.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(title, style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+          if (trailing != null) trailing!,
+        ]),
+        const SizedBox(height: 12),
+        ...children,
+      ]),
+    );
+  }
+}
+
+class _EarningBox extends StatelessWidget {
+  final String label, value;
+  final Color color;
+  const _EarningBox(this.label, this.value, this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(child: Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: AppColors.surface900, borderRadius: BorderRadius.circular(14)),
+      child: Column(children: [
+        Text(value, style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 10)),
+      ]),
+    ));
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String title, subtitle;
+  final Widget? trailing;
+  const _InfoTile(this.icon, this.title, this.subtitle, {this.trailing});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: AppColors.surface900, borderRadius: BorderRadius.circular(14)),
+      child: Row(children: [
+        Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, color: AppColors.blue, size: 20)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(subtitle, style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+        ])),
+        if (trailing != null) trailing!,
+      ]),
+    );
+  }
+}
+
+class _VerifiedBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(color: AppColors.emerald.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+      child: Text('Verified', style: TextStyle(color: AppColors.emerald, fontSize: 10, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _AddButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _AddButton(this.label, this.onTap);
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: onTap, child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08), style: BorderStyle.solid),
+      ),
+      child: Center(child: Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 13))),
+    ));
+  }
+}
+
+class _ProgressRow extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+  const _ProgressRow(this.label, this.value, this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(label, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+        Text('${(value * 100).toInt()}%', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700)),
+      ]),
+      const SizedBox(height: 4),
+      ClipRRect(borderRadius: BorderRadius.circular(6), child: LinearProgressIndicator(
+        value: value.clamp(0.0, 1.0), minHeight: 6,
+        backgroundColor: Colors.white.withOpacity(0.05), valueColor: AlwaysStoppedAnimation(color),
+      )),
+    ]);
+  }
+}
+
+Widget _Input(TextEditingController ctl, String hint, IconData icon, {bool mono = false, bool obscure = false}) {
+  return TextField(
+    controller: ctl, obscureText: obscure,
+    style: TextStyle(color: Colors.white, fontSize: 14, fontFamily: mono ? 'monospace' : null),
+    decoration: InputDecoration(
+      hintText: hint, hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
+      prefixIcon: Icon(icon, color: AppColors.textMuted, size: 18),
+      filled: true, fillColor: AppColors.surface800,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.white.withOpacity(0.05))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.blue.withOpacity(0.3))),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    ),
+  );
 }

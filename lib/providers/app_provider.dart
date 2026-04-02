@@ -329,6 +329,26 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  void updateUserProfile(String userId, {String? name, String? phone, String? email,
+    String? bankLast4, String? cardLast4, String? vehicleMake, String? vehicleModel,
+    String? vehicleYear, String? vehiclePlate, UserAddress? address}) {
+    final idx = users.indexWhere((u) => u.id == userId);
+    if (idx == -1) return;
+    final u = users[idx];
+    if (name != null) u.name = name;
+    if (phone != null) u.phone = phone;
+    if (email != null) u.email = email;
+    if (bankLast4 != null) u.bankLast4 = bankLast4;
+    if (cardLast4 != null) u.cardLast4 = cardLast4;
+    if (vehicleMake != null) u.vehicleMake = vehicleMake;
+    if (vehicleModel != null) u.vehicleModel = vehicleModel;
+    if (vehicleYear != null) u.vehicleYear = vehicleYear;
+    if (vehiclePlate != null) u.vehiclePlate = vehiclePlate;
+    if (address != null) u.address = address;
+    notifyListeners();
+    _saveToDisk();
+  }
+
   void updateSetting(String key, dynamic value) {
     switch (key) {
       case 'platformFeePercent': settings.platformFeePercent = value.toDouble(); break;
