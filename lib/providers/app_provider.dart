@@ -169,7 +169,7 @@ class AppProvider extends ChangeNotifier {
     deliveries.add(Delivery(
       id: 'del-${DateTime.now().millisecondsSinceEpoch}',
       orderId: orderId,
-      pickup: merchant?.address?.formatted ?? merchant?.name ?? 'Merchant',
+      pickup: merchant?.address?.formatted ?? merchant?.name ?? 'Farmer',
       dropoff: customer?.address?.formatted ?? customer?.name ?? 'Customer',
       pay: driverPay,
     ));
