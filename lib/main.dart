@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'models/models.dart';
 import 'providers/app_provider.dart';
 import 'theme/app_theme.dart';
+import 'screens/welcome_auth.dart';
 import 'screens/role_selection.dart';
 import 'screens/customer/customer_app.dart';
 import 'screens/driver/driver_app.dart';
@@ -58,7 +59,16 @@ class AppShell extends StatelessWidget {
   }
 
   Widget _buildScreen(AppProvider app) {
+    // Step 1: Welcome onboarding
+    if (!app.onboardingSeen) return const WelcomeScreen();
+
+    // Step 2: Auth
+    if (app.authedEmail == null) return const AuthScreen();
+
+    // Step 3: Role selection
     if (app.role == null) return const RoleSelectionScreen();
+
+    // Step 4: App
     switch (app.role!) {
       case UserRole.customer: return const CustomerAppScreen();
       case UserRole.driver: return const DriverAppScreen();
@@ -67,4 +77,3 @@ class AppShell extends StatelessWidget {
     }
   }
 }
-// v1.0.1

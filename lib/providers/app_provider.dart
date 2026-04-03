@@ -7,6 +7,9 @@ class AppProvider extends ChangeNotifier {
   // State
   UserRole? _role;
   String? _currentUserId;
+  bool onboardingSeen = false;
+  String? authedEmail;
+  String? authedProvider;
   PlatformSettings settings = PlatformSettings();
   List<User> users = [];
   List<Product> products = [];
@@ -399,6 +402,9 @@ class AppProvider extends ChangeNotifier {
       await prefs.setString('ff_deliveries', jsonEncode(deliveries.map((d) => d.toJson()).toList()));
       await prefs.setString('ff_transactions', jsonEncode(transactions.map((t) => t.toJson()).toList()));
       await prefs.setString('ff_reviews', jsonEncode(reviews.map((r) => r.toJson()).toList()));
+      await prefs.setBool('ff_onboarding_seen', onboardingSeen);
+      if (authedEmail != null) await prefs.setString('ff_authed_email', authedEmail!);
+      if (authedProvider != null) await prefs.setString('ff_authed_provider', authedProvider!);
     } catch (e) {
       print('Save error: $e');
     }
@@ -407,6 +413,9 @@ class AppProvider extends ChangeNotifier {
   Future<void> _loadFromDisk() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      onboardingSeen = prefs.getBool('ff_onboarding_seen') ?? false;
+      authedEmail = prefs.getString('ff_authed_email');
+      authedProvider = prefs.getString('ff_authed_provider');
       final s = prefs.getString('ff_settings');
       if (s != null) settings = PlatformSettings.fromJson(jsonDecode(s));
       final u = prefs.getString('ff_users');
@@ -425,6 +434,28 @@ class AppProvider extends ChangeNotifier {
     } catch (e) {
       print('Load error: $e');
     }
+  }
+
+  void completeOnboarding() {
+    onboardingSeen = true;
+    notifyListeners();
+    _saveToDisk();
+  }
+
+  void signIn(String email, String provider) {
+    authedEmail = email;
+    authedProvider = provider;
+    notifyListeners();
+    _saveToDisk();
+  }
+
+  void signOut() {
+    _role = null;
+    _currentUserId = null;
+    authedEmail = null;
+    authedProvider = null;
+    notifyListeners();
+    _saveToDisk();
   }
 
   // ============================================
