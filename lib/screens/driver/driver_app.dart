@@ -5,6 +5,7 @@ import '../../models/models.dart';
 import '../../providers/app_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/shared_widgets.dart';
+import '../chat_photo.dart';
 
 class DriverAppScreen extends StatefulWidget {
   const DriverAppScreen({super.key});
@@ -146,17 +147,31 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
                 )),
               ]),
               const SizedBox(height: 8),
+              // Chat button
+              SizedBox(width: double.infinity, child: OutlinedButton.icon(
+                onPressed: () {
+                  final order = app.orders.cast<dynamic>().firstWhere((o) => o.id == active.orderId, orElse: () => null);
+                  final customerName = order != null ? (app.users.firstWhere((u) => u.id == order.customerId, orElse: () => app.users.first).name) : 'Customer';
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => OrderChatScreen(orderId: active.id, otherName: customerName, otherRole: 'Customer')));
+                },
+                icon: const Text('💬', style: TextStyle(fontSize: 16)),
+                label: const Text('Chat with Customer'),
+                style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF8B5CF6), side: BorderSide(color: const Color(0xFF8B5CF6).withOpacity(0.3)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              )),
+              const SizedBox(height: 8),
             ],
             if (active.status == 'Accepted')
-              SizedBox(width: double.infinity, child: ElevatedButton(
+              SizedBox(width: double.infinity, child: ElevatedButton.icon(
                 onPressed: () => app.pickupJob(active.id),
+                icon: const Icon(Icons.camera_alt, size: 18),
+                label: const Text('Photo & Pickup'),
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.blue),
-                child: const Text('Confirm Pickup'),
               )),
             if (active.status == 'Picked Up')
-              SizedBox(width: double.infinity, child: ElevatedButton(
+              SizedBox(width: double.infinity, child: ElevatedButton.icon(
                 onPressed: () => app.completeJob(active.id),
-                child: const Text('Complete Delivery'),
+                icon: const Icon(Icons.camera_alt, size: 18),
+                label: const Text('Photo & Complete'),
               )),
           ]),
         ),
