@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.2
+  url_launcher: ^6.2.0
   shared_preferences: ^2.3.3
   google_fonts: ^6.2.1
   #lucide_icons: ^0.257.0  # using Material icons instead

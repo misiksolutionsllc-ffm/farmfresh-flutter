@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/models.dart';
 import '../../providers/app_provider.dart';
 import '../../theme/app_theme.dart';
@@ -119,6 +120,33 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
               Text(formatCurrency(active.pay), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
             ]),
             const SizedBox(height: 12),
+            // Navigation buttons
+            if (active.status == 'Accepted' || active.status == 'Picked Up') ...[
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: () {
+                    final lat = active.status == 'Accepted' ? 26.6620 : 26.6540;
+                    final lng = active.status == 'Accepted' ? -80.2710 : -80.2620;
+                    launchUrl(Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving'), mode: LaunchMode.externalApplication);
+                  },
+                  icon: const Icon(Icons.map, size: 16),
+                  label: const Text('Google Maps', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(foregroundColor: AppColors.blue, side: BorderSide(color: AppColors.blue.withOpacity(0.3)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                )),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton.icon(
+                  onPressed: () {
+                    final lat = active.status == 'Accepted' ? 26.6620 : 26.6540;
+                    final lng = active.status == 'Accepted' ? -80.2710 : -80.2620;
+                    launchUrl(Uri.parse('https://maps.apple.com/?daddr=$lat,$lng&dirflg=d'), mode: LaunchMode.externalApplication);
+                  },
+                  icon: const Icon(Icons.navigation, size: 16),
+                  label: const Text('Apple Maps', style: TextStyle(fontSize: 12)),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.white70, side: BorderSide(color: Colors.white.withOpacity(0.1)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                )),
+              ]),
+              const SizedBox(height: 8),
+            ],
             if (active.status == 'Accepted')
               SizedBox(width: double.infinity, child: ElevatedButton(
                 onPressed: () => app.pickupJob(active.id),
