@@ -1,5 +1,5 @@
 // ============================================================
-// FarmFresh Data Models — ported from lib/store.ts
+// EdemFarm Data Models — ported from lib/store.ts
 // ============================================================
 
 class AppConfig {

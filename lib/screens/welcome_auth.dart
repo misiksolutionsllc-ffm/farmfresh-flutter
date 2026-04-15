@@ -17,7 +17,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final _controller = PageController();
 
   static const _slides = [
-    {'emoji': '🥬', 'title': 'Welcome to FarmFresh Hub', 'sub': 'Farm-to-table, reimagined', 'desc': 'Connect directly with local farmers who grow clean, natural food — no GMOs, no synthetic pesticides, no artificial anything.'},
+    {'emoji': '🥬', 'title': 'Welcome to EdemFarm', 'sub': 'Farm-to-table, reimagined', 'desc': 'Connect directly with local farmers who grow clean, natural food — no GMOs, no synthetic pesticides, no artificial anything.'},
     {'emoji': '🚗', 'title': 'Fresh to Your Door', 'sub': 'Fast local delivery', 'desc': 'Our community drivers deliver straight from the farm to your table. Track your order in real-time with GPS.'},
     {'emoji': '🌾', 'title': 'Support Local Heroes', 'sub': 'Empower American farmers', 'desc': 'Every purchase supports independent Farmer American Heroes in your community. Know exactly where your food comes from.'},
   ];
@@ -177,7 +177,7 @@ class _AuthScreenState extends State<AuthScreen> {
           Text(_isLogin ? 'Welcome Back' : 'Create Account',
             style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
-          Text(_isLogin ? 'Sign in to your FarmFresh Hub account' : 'Join the farm-to-table revolution',
+          Text(_isLogin ? 'Sign in to your EdemFarm account' : 'Join the farm-to-table revolution',
             style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
           const SizedBox(height: 28),
 

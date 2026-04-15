@@ -463,9 +463,9 @@ class AppProvider extends ChangeNotifier {
   // ============================================
   void _initSeedData() {
     users = [
-      User(id: 'u1', name: 'New Customer', role: UserRole.customer, email: 'customer@farmfresh.app', points: 0, credits: 0, referralCode: 'FRESH10', referralCount: 0, totalSpent: 0, loyaltyTier: 'Bronze'),
-      User(id: 'u2', name: 'New Driver', role: UserRole.driver, email: 'driver@farmfresh.app', rating: 0, trips: 0, earnings: 0, online: false, acceptanceRate: 0),
-      User(id: 'u3', name: 'New Farmer', role: UserRole.farmer, email: 'farmer@farmfresh.app', rating: 0, revenue: 0),
+      User(id: 'u1', name: 'New Customer', role: UserRole.customer, email: 'customer@edemfarm.app', points: 0, credits: 0, referralCode: 'FRESH10', referralCount: 0, totalSpent: 0, loyaltyTier: 'Bronze'),
+      User(id: 'u2', name: 'New Driver', role: UserRole.driver, email: 'driver@edemfarm.app', rating: 0, trips: 0, earnings: 0, online: false, acceptanceRate: 0),
+      User(id: 'u3', name: 'New Farmer', role: UserRole.farmer, email: 'farmer@edemfarm.app', rating: 0, revenue: 0),
       User(id: 'u4', name: 'Platform Admin', role: UserRole.owner, email: 'misiksolutionsllc@gmail.com', verified: true),
     ];
 

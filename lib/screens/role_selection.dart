@@ -39,7 +39,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   child: const Center(child: Text('🥬', style: TextStyle(fontSize: 40))),
                 ),
                 const SizedBox(height: 24),
-                Text('FarmFresh', style: Theme.of(context).textTheme.displayLarge),
+                Text('EdemFarm', style: Theme.of(context).textTheme.displayLarge),
                 Text('Hub', style: Theme.of(context).textTheme.displayLarge?.copyWith(color: AppColors.emerald, height: 0.9)),
                 const SizedBox(height: 12),
                 Text(

@@ -21,18 +21,18 @@ void main() {
       systemNavigationBarColor: AppColors.surface950,
     ),
   );
-  runApp(const FarmFreshApp());
+  runApp(const EdemFarmApp());
 }
 
-class FarmFreshApp extends StatelessWidget {
-  const FarmFreshApp({super.key});
+class EdemFarmApp extends StatelessWidget {
+  const EdemFarmApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AppProvider(),
       child: MaterialApp(
-        title: 'FarmFresh Hub',
+        title: 'EdemFarm',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: const AppShell(),
